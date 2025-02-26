@@ -128,9 +128,9 @@ def rename_file(old_path: str, new_name: str):
     os.rename(old_path, new_path)
 
 
-def get_dir_files_count(dir_path: str) -> int:
+def count_dir_files(dir_path: str) -> int:
     """
-    Get the total (recursive) number of files in a directory.
+    Count the total (recursive) number of files in a directory.
     """
 
     return sum([len(file_names) for _, _, file_names in os.walk(dir_path)])
@@ -147,5 +147,5 @@ def tar_with_progress(file_path: str, tar_path: str, file_alias: str | None = No
         tar.add(
             file_path,
             arcname=arc_name,
-            filter=get_progress_printer(get_dir_files_count(file_path), lambda x: x)
+            filter=get_progress_printer(count_dir_files(file_path), lambda x: x)
         )

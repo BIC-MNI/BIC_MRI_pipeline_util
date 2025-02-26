@@ -4,7 +4,7 @@ import shutil
 import pydicom
 import pydicom.misc
 
-from bic_util.fs import get_dir_files_count
+from bic_util.fs import count_dir_files
 from bic_util.print import get_progress_printer
 
 
@@ -41,7 +41,7 @@ def copy_dicom_dir_patch_patient_name(
     Copy a DICOM directory while renaming its DICOM patient name attribute.
     """
 
-    progress = get_progress_printer(get_dir_files_count(src_dicom_dir_path))
+    progress = get_progress_printer(count_dir_files(src_dicom_dir_path))
 
     for src_dir_path, _, src_file_names in os.walk(src_dicom_dir_path):
         dir_rel_path = os.path.relpath(src_dir_path, src_dicom_dir_path)

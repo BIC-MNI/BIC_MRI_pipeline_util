@@ -1,26 +1,10 @@
 import os
 import stat
+from collections.abc import Callable
 
-from paramiko import AuthenticationException, AutoAddPolicy, RSAKey, SFTPClient, SSHClient
+from paramiko import SFTPClient, SSHClient
 
 from bic_util.print import print_error_exit
-
-
-def get_ssh_client(url: str, port: int, username: str, private_key: RSAKey):
-    """
-    Get an SSH client with the given credentials.
-    Raise an `AuthenticationException` if the authentication fails.
-    """
-
-    ssh_client = SSHClient()
-    ssh_client.set_missing_host_key_policy(AutoAddPolicy())
-    try:
-        ssh_client.connect(url, port=port, username=username, pkey=private_key)
-    except AuthenticationException as e:
-        print(e)
-        print_error_exit('Authentification error while establishing an SSH connection with C-BIG.')
-
-    return ssh_client
 
 
 def exec_ssh_shell_command(ssh_client: SSHClient, command: str):
@@ -29,16 +13,19 @@ def exec_ssh_shell_command(ssh_client: SSHClient, command: str):
     """
 
     try:
-        result = ssh_client.exec_command(f'bash -ic "{command}"')
+        _, stdout, _ = ssh_client.exec_command(f'bash -ic "{command}"')
     except Exception as e:
         print(e)
-        print_error_exit(f'Error executing command \'{command}\'')
+        print_error_exit(f"Error executing command '{command}'")
+
+    if stdout.channel.recv_exit_status() != 0:
+        raise Exception()
 
     # TODO: Log outputs ?
     # stdout = result[1].read().decode('utf-8')
     # stderr = result[2].read().decode('utf-8')
 
-    return result[1].read().decode('utf-8')
+    return stdout.read().decode('utf-8')
 
 
 def check_ssh_path_exists(ssh_client: SSHClient, remote_path: str) -> bool:
@@ -93,7 +80,12 @@ def upload_ssh_file(ssh_client: SSHClient, local_file_path: str, remote_file_pat
         sftp_client.close()
 
 
-def upload_ssh_directory(ssh_client: SSHClient, local_dir_path: str, remote_dir_path: str):
+def upload_ssh_directory(
+    ssh_client: SSHClient,
+    local_dir_path: str,
+    remote_dir_path: str,
+    progress_callback: Callable[[str], None] | None = None,
+):
     """
     Upload a local directory to a remote server using SFTP. Printing the name of each file being
     uploaded.
@@ -111,7 +103,8 @@ def upload_ssh_directory(ssh_client: SSHClient, local_dir_path: str, remote_dir_
                 file_rel_path = os.path.join(sub_dir_rel_path, file_name)
                 local_file_path = os.path.join(local_dir_path, file_rel_path)
                 remote_file_path = os.path.join(remote_dir_path, file_rel_path)
-                print(f'Uploading file \'{file_rel_path}\'...')
+                if progress_callback is not None:
+                    progress_callback(file_rel_path)
                 sftp_client.put(local_file_path, remote_file_path)
     finally:
         sftp_client.close()

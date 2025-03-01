@@ -10,10 +10,10 @@ def require_directory(dir_path: str):
     """
 
     if not os.path.exists(dir_path):
-        print_error_exit(f'directory \'{dir_path}\' not found')
+        print_error_exit(f"Directory '{dir_path}' not found.")
 
     if not os.path.isdir(dir_path):
-        print_error_exit(f'\'{dir_path}\' is not a directory')
+        print_error_exit(f"'{dir_path}' is not a directory.")
 
 
 def require_readable_directory(dir_path: str):
@@ -25,7 +25,7 @@ def require_readable_directory(dir_path: str):
     require_directory(dir_path)
 
     if not os.access(dir_path, os.R_OK):
-        print_error_exit(f'directory \'{dir_path}\' is not readable')
+        print_error_exit(f"Directory '{dir_path}' is not readable.")
 
 
 def require_writable_directory(dir_path: str):
@@ -37,7 +37,7 @@ def require_writable_directory(dir_path: str):
     require_directory(dir_path)
 
     if not os.access(dir_path, os.W_OK):
-        print_error_exit(f'directory \'{dir_path}\' is not writable')
+        print_error_exit(f"Directory '{dir_path}' is not writable.")
 
 
 def require_empty_directory(dir_path: str):
@@ -50,7 +50,7 @@ def require_empty_directory(dir_path: str):
 
     with os.scandir(dir_path) as iterator:
         if any(iterator):
-            print_error_exit(f'directory \'{dir_path}\' is not empty')
+            print_error_exit(f"Directory '{dir_path}' is not empty.")
 
 
 def require_output_directory(dir_path: str):
@@ -77,13 +77,13 @@ def require_readable_file(file_path: str):
     """
 
     if not os.path.exists(file_path):
-        print_error_exit(f'file \'{file_path}\' not found')
+        print_error_exit(f"File '{file_path}' not found.")
 
     if not os.path.isfile(file_path):
-        print_error_exit(f'\'{file_path}\' is not a directory')
+        print_error_exit(f"File '{file_path}' is not a directory.")
 
     if not os.access(file_path, os.R_OK):
-        print_error_exit(f'file \'{file_path}\' is not readable')
+        print_error_exit(f"File '{file_path}' is not readable.")
 
 
 def require_writable_file(file_path: str):
@@ -94,14 +94,14 @@ def require_writable_file(file_path: str):
 
     if os.path.exists(file_path):
         if not os.path.isfile(file_path):
-            print_error_exit(f'\'{file_path}\' is not a file')
+            print_error_exit(f"'{file_path}' is not a file.")
 
         if not os.access(file_path, os.W_OK):
-            print_error_exit(f'file \'{file_path}\' is not writable')
+            print_error_exit(f"File '{file_path}' is not writable.")
     else:
         dir_path = os.path.dirname(file_path)
         if not os.access(dir_path, os.W_OK):
-            print_error_exit(f'cannot to create file \'{file_path}\'')
+            print_error_exit(f"Cannot create file '{file_path}'.")
 
 
 def create_directory(dir_path: str):
@@ -112,9 +112,9 @@ def create_directory(dir_path: str):
     try:
         os.mkdir(dir_path)
     except FileExistsError:
-        print_error_exit(f'directory \'{dir_path}\' already exists')
+        print_error_exit(f"Directory '{dir_path}' already exists.")
     except FileNotFoundError:
-        print_error_exit(f'cannot create directory \'{dir_path}\', parent directory does not exist')
+        print_error_exit(f"Cannot create directory '{dir_path}', parent directory does not exist.")
 
 
 def rename_file(old_path: str, new_name: str):

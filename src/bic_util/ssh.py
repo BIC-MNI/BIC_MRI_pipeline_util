@@ -13,17 +13,17 @@ def exec_ssh_shell_command(ssh_client: SSHClient, command: str):
     """
 
     try:
-        _, stdout, _ = ssh_client.exec_command(f'bash -ic "{command}"')
+        _, stdout, stderr = ssh_client.exec_command(f'bash -ic "{command}"')
     except Exception as e:
         print(e)
         print_error_exit(f"Error executing command '{command}'")
 
+    # TODO: Handle output better
+    print(stdout.read().decode('utf-8'))
+    print(stderr.read().decode('utf-8'))
+
     if stdout.channel.recv_exit_status() != 0:
         raise Exception()
-
-    # TODO: Log outputs ?
-    # stdout = result[1].read().decode('utf-8')
-    # stderr = result[2].read().decode('utf-8')
 
     return stdout.read().decode('utf-8')
 

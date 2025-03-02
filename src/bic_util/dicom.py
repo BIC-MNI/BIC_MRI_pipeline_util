@@ -8,28 +8,20 @@ from bic_util.fs import count_dir_files
 from bic_util.print import get_progress_printer
 
 
-def get_dicom_dir_dicom_file_path(dicom_dir_path: str) -> str | None:
+def get_dicom_study_patient_name(dicom_study_path: str) -> str | None:
     """
-    Look for a DICOM file in a DICOM directory and return the path of this file.
+    Look for a DICOM file in a DICOM study and return the patient name of that file.
     """
 
-    for dir_path, _, file_names in os.walk(dicom_dir_path):
+    for dir_path, _, file_names in os.walk(dicom_study_path):
         for file_name in file_names:
             file_path = os.path.join(dir_path, file_name)
 
             if pydicom.misc.is_dicom(file_path):
-                return file_path
+                ds = pydicom.dcmread(file_path)  # type: ignore
+                return str(ds.PatientName)
 
     return None
-
-
-def get_dicom_file_patient_name(dicom_file_path: str) -> str | None:
-    """
-    Get the patient name of a DICOM file.
-    """
-
-    ds = pydicom.dcmread(dicom_file_path)  # type: ignore
-    return ds.PatientName
 
 
 def copy_dicom_dir_patch_patient_name(

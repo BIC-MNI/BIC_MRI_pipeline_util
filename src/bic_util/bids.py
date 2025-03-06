@@ -1,3 +1,4 @@
+import csv
 import os
 import re
 import shutil
@@ -80,6 +81,33 @@ def copy_bids_sessions(input_bids_path: str, output_bids_path: str, bids_session
                 continue
 
             shutil.copytree(file_2.path, file_2_output_path)
+
+    copy_bids_participants_tsv_sessions(input_bids_path, output_bids_path, bids_sessions)
+
+
+def copy_bids_participants_tsv_sessions(input_bids_path: str, output_bids_path: str, bids_sessions: list[BidsSession]):
+    """
+    Copy a BIDS `participants.tsv` file while retaining only the subjects that are specified in the
+    given BIDS subject and session pairs.
+    """
+
+    bids_subject_labels = list(map(lambda bids_session: bids_session.subject, bids_sessions))
+
+    input_participants_path  = os.path.join(input_bids_path, 'participants.tsv')
+    output_participants_path = os.path.join(output_bids_path, 'participants.tsv')
+
+    if not os.path.exists(input_participants_path):
+        return
+
+    with open(input_participants_path) as input_participants_file:
+        reader = csv.reader(input_participants_file.readlines(), delimiter='\t')
+
+    with open(output_participants_path, 'w') as output_participants_file:
+        writer = csv.writer(output_participants_file, delimiter='\t')
+        writer.writerow(next(reader))
+        for row in reader:
+            if row[0] in bids_subject_labels:
+                writer.writerow(row)
 
 
 def has_bids_session(bids_path: str, bids_session: BidsSession) -> bool:

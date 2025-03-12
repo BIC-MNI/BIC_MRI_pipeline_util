@@ -1,5 +1,6 @@
 import sys
-from typing import Callable, Never, ParamSpec, TypeVar
+from collections.abc import Generator
+from typing import Never, TextIO
 
 verbose_flag: bool = False
 
@@ -17,7 +18,7 @@ def set_verbose(verbose: bool):
     verbose_flag = verbose
 
 
-def print_verbose(message: str) -> None:
+def print_verbose(message: str):
     """
     Print a message in the console if the script is running in verbose mode.
     """
@@ -26,12 +27,20 @@ def print_verbose(message: str) -> None:
         print(message)
 
 
-def print_warning(message: str) -> None:
+def print_warning(message: str):
     """
     Print a warning message in the console.
     """
 
-    print(f'{COLOR_WARNING}WARNING: {message}{COLOR_END}', file=sys.stderr)
+    print_with_color(sys.stderr, f"WARNING: {message}", COLOR_WARNING)
+
+
+def print_error(message: str):
+    """
+    Print an error message in the console.
+    """
+
+    print_with_color(sys.stderr, f"ERROR: {message}", COLOR_ERROR)
 
 
 def print_error_exit(message: str, exit_code: int = -1) -> Never:
@@ -39,28 +48,38 @@ def print_error_exit(message: str, exit_code: int = -1) -> Never:
     Print an error message in the console and exit the program.
     """
 
-    print(f'{COLOR_ERROR}ERROR: {message}{COLOR_END}', file=sys.stderr)
+    print_error(message)
     exit(exit_code)
 
 
-P = ParamSpec("P")
-R = TypeVar("R")
-
-
-def get_progress_printer(total: int, func: Callable[P, R] = lambda: None) -> Callable[P, R]:
+def get_progress_printer(total: int) -> Generator[None, None, None]:
     """
     Get a function whose each call increments and prints a progress counter up to the defined
     maximum.
     """
 
+    is_terminal = sys.stdout.isatty()
+
     progress = 0
-    print(f'{progress} / {total}', end='\r')
-
-    def printer(*args: P.args, **kwargs: P.kwargs) -> R:
-        nonlocal progress
-        result = func(*args, **kwargs)
+    while progress <= total:
         progress += 1
-        print(f'{progress} / {total}', end='\r')
-        return result
 
-    return printer
+        # Do not print every step in a non-terminal output stream to not flood that stream.
+        if is_terminal:
+            print(f"{progress} / {total}", end='\r')
+        elif progress % 100 == 0:
+            print(f"{progress} / {total}")
+
+        yield None
+
+
+def print_with_color(output_stream: TextIO, message: str, color_code: str):
+    """
+    Print a message in an output stream using the given color code if that output stream is a
+    terminal, or print the message normally otherwise.
+    """
+
+    if output_stream.isatty():
+        print(f'{color_code}{message}{COLOR_END}', file=output_stream)
+    else:
+        print(message, file=output_stream)

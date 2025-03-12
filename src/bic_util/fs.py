@@ -138,14 +138,15 @@ def count_dir_files(dir_path: str) -> int:
 
 def tar_with_progress(file_path: str, tar_path: str, file_alias: str | None = None):
     """
-    Archive file or directory into a tar file, printing progress while doing so.
+    Archive a file or directory into a tar file, printing progress while doing so.
     """
 
     file_name = os.path.basename(file_path)
     arc_name = file_alias if file_alias is not None else file_name
+    progress = get_progress_printer(count_dir_files(file_path))
     with tarfile.open(tar_path, 'w') as tar:
         tar.add(
             file_path,
             arcname=arc_name,
-            filter=get_progress_printer(count_dir_files(file_path), lambda x: x)
+            filter=lambda x: next(progress) or x
         )

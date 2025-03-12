@@ -13,7 +13,7 @@ def exec_ssh_shell_command(ssh_client: SSHClient, command: str):
     """
 
     try:
-        _, stdout, stderr = ssh_client.exec_command(f'bash -ic "{command}"')
+        _, stdout, stderr = ssh_client.exec_command(f'bash -ic "{command}"', get_pty=True)
     except Exception as e:
         print(e)
         print_error_exit(f"Error executing command '{command}'")

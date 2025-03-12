@@ -44,15 +44,14 @@ def copy_dicom_dir_patch_patient_name(
 
         # Patch and copy files and DICOMs
         for src_file_name in src_file_names:
+            next(progress)
             src_file_path = os.path.join(src_dir_path, src_file_name)
             dst_file_path = os.path.join(dst_dir_path, src_file_name)
 
             if not pydicom.misc.is_dicom(src_file_path):
                 shutil.copyfile(src_file_path, dst_file_path)
-                progress()
                 continue
 
             ds = pydicom.dcmread(src_file_path)  # type: ignore
             ds.PatientName = patient_name
             ds.save_as(dst_file_path)
-            progress()

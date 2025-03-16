@@ -1,5 +1,6 @@
 import os
 import tarfile
+from collections.abc import Generator
 
 from bic_util.print import get_progress_printer, print_error_exit
 
@@ -128,12 +129,24 @@ def rename_file(old_path: str, new_name: str):
     os.rename(old_path, new_path)
 
 
-def count_dir_files(dir_path: str) -> int:
+def count_all_dir_files(dir_path: str) -> int:
     """
-    Count the total (recursive) number of files in a directory.
+    Count the number of files in a directory recursively.
     """
 
     return sum([len(file_names) for _, _, file_names in os.walk(dir_path)])
+
+
+def iter_all_dir_files(dir_path: str) -> Generator[str, None, None]:
+    """
+    Iterate through all the files in a directory recursively, and yield the path of each file
+    relative to that directory.
+    """
+
+    for sub_dir_path, _, file_names in os.walk(dir_path):
+        for file_name in file_names:
+            file_path = os.path.join(sub_dir_path, file_name)
+            yield os.path.relpath(file_path, start=dir_path)
 
 
 def tar_with_progress(file_path: str, tar_path: str, file_alias: str | None = None):
@@ -143,7 +156,7 @@ def tar_with_progress(file_path: str, tar_path: str, file_alias: str | None = No
 
     file_name = os.path.basename(file_path)
     arc_name = file_alias if file_alias is not None else file_name
-    progress = get_progress_printer(count_dir_files(file_path))
+    progress = get_progress_printer(count_all_dir_files(file_path))
     with tarfile.open(tar_path, 'w') as tar:
         tar.add(
             file_path,

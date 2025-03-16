@@ -100,13 +100,18 @@ def copy_bids_participants_tsv_sessions(input_bids_path: str, output_bids_path: 
         return
 
     with open(input_participants_path) as input_participants_file:
-        reader = csv.reader(input_participants_file.readlines(), delimiter='\t')
+        reader = csv.DictReader(input_participants_file.readlines(), delimiter='\t')
+
+    if reader.fieldnames is None:
+        return
+
+    if 'participant_id' not in reader.fieldnames:
+        return
 
     with open(output_participants_path, 'w') as output_participants_file:
-        writer = csv.writer(output_participants_file, delimiter='\t')
-        writer.writerow(next(reader))
+        writer = csv.DictWriter(output_participants_file, fieldnames=reader.fieldnames, delimiter='\t')
         for row in reader:
-            if row[0] in bids_subject_labels:
+            if row['participant_id'] in bids_subject_labels:
                 writer.writerow(row)
 
 

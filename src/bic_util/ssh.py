@@ -1,31 +1,49 @@
 import os
+import shlex
 import stat
 from collections.abc import Callable
+from dataclasses import dataclass
 
 from paramiko import SFTPClient, SSHClient
 
 from bic_util.print import print_error_exit
 
 
-def exec_ssh_shell_command(ssh_client: SSHClient, command: str):
+@dataclass
+class SSHCommandResult:
     """
-    Upload a local file to a remote server using SSH.
+    The exit code, standard output, and standard error returned by a command ran through SSH.
+    """
+
+    exit_code: int
+    stdout: str
+    stderr: str
+
+
+def exec_ssh_shell_command(ssh_client: SSHClient, command: str) -> SSHCommandResult:
+    """
+    Execute a shell command on a remote server through SSH.
     """
 
     try:
-        _, stdout, stderr = ssh_client.exec_command(f'bash -ic "{command}"', get_pty=True)
+        _, stdout, stderr = ssh_client.exec_command(f'bash -ic {shlex.quote(command)}', get_pty=True)
+
+        # Wait until the command is completed and get the exit code.
+        exit_code = stdout.channel.recv_exit_status()
+
+        stdout_text = stdout.read().decode('utf-8')
+        stderr_text = stderr.read().decode('utf-8')
+
+        stdout.close()
+        stderr.close()
     except Exception as e:
-        print(e)
-        print_error_exit(f"Error executing command '{command}'")
+        print_error_exit(f"Error executing command '{command}'. Full error:\n{e}")
 
-    # TODO: Handle output better
-    print(stdout.read().decode('utf-8'))
-    print(stderr.read().decode('utf-8'))
-
-    if stdout.channel.recv_exit_status() != 0:
-        raise Exception()
-
-    return stdout.read().decode('utf-8')
+    return SSHCommandResult(
+        exit_code = exit_code,
+        stdout    = stdout_text,
+        stderr    = stderr_text,
+    )
 
 
 def check_ssh_path_exists(ssh_client: SSHClient, remote_path: str) -> bool:

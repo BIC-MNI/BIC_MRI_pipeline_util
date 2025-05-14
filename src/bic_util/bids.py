@@ -93,7 +93,7 @@ def copy_bids_participants_tsv_sessions(input_bids_path: str, output_bids_path: 
 
     bids_subject_labels = list(map(lambda bids_session: bids_session.subject, bids_sessions))
 
-    input_participants_path  = os.path.join(input_bids_path, 'participants.tsv')
+    input_participants_path  = os.path.join(input_bids_path,  'participants.tsv')
     output_participants_path = os.path.join(output_bids_path, 'participants.tsv')
 
     if not os.path.exists(input_participants_path):
@@ -110,8 +110,10 @@ def copy_bids_participants_tsv_sessions(input_bids_path: str, output_bids_path: 
 
     with open(output_participants_path, 'w') as output_participants_file:
         writer = csv.DictWriter(output_participants_file, fieldnames=reader.fieldnames, delimiter='\t')
+        writer.writeheader()
         for row in reader:
-            if row['participant_id'] in bids_subject_labels:
+            bids_subject_label = re.sub('^sub-', '', row['participant_id'])
+            if bids_subject_label in bids_subject_labels:
                 writer.writerow(row)
 
 

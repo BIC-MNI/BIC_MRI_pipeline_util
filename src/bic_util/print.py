@@ -1,11 +1,12 @@
 import sys
-from collections.abc import Generator
-from typing import Never, TextIO
+from collections.abc import Callable, Generator
+from typing import Never, TextIO, TypeVar
 
 verbose_flag: bool = False
 
 COLOR_WARNING = '\033[93m'
 COLOR_ERROR   = '\033[91m'
+COLOR_DIM     = '\033[2m'
 COLOR_END     = '\033[0m'
 
 
@@ -50,6 +51,26 @@ def print_error_exit(message: str, exit_code: int = -1) -> Never:
 
     print_error(message)
     exit(exit_code)
+
+
+T = TypeVar('T')
+
+
+def with_print_subscript(f: Callable[[], T]) -> T:
+    """
+    Run a function while printing its output as a subscript output.
+    """
+
+    is_terminal = sys.stdout.isatty()
+    if not is_terminal:
+        return f()
+
+    print(COLOR_DIM, end='')
+
+    try:
+        return f()
+    finally:
+        print(COLOR_END, end='')
 
 
 def get_progress_printer(total: int) -> Generator[None, None, None]:

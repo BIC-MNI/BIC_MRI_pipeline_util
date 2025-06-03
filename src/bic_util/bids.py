@@ -112,7 +112,7 @@ def copy_bids_participants_tsv_sessions(input_bids_path: str, output_bids_path: 
         writer = csv.DictWriter(output_participants_file, fieldnames=reader.fieldnames, delimiter='\t')
         writer.writeheader()
         for row in reader:
-            bids_subject_label = re.sub('^sub-', '', row['participant_id'])
+            bids_subject_label = re.sub(r'^sub-', '', row['participant_id'])
             if bids_subject_label in bids_subject_labels:
                 writer.writerow(row)
 

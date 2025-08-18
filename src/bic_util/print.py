@@ -50,7 +50,7 @@ def print_error_exit(message: str, exit_code: int = -1) -> Never:
     """
 
     print_error(message)
-    exit(exit_code)
+    sys.exit(exit_code)
 
 
 T = TypeVar('T')

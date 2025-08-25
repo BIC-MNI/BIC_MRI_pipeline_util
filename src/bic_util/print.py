@@ -1,3 +1,5 @@
+import contextlib
+import io
 import sys
 from collections.abc import Callable, Generator
 from typing import Never, TextIO, TypeVar
@@ -71,6 +73,26 @@ def with_print_subscript(f: Callable[[], T]) -> T:
         return f()
     finally:
         print(COLOR_END, end='')
+
+
+def with_print_capture(f: Callable[[], T]) -> tuple[str, str, T]:
+    """
+    Run a function while capturing its standad output and error.
+    """
+
+    # Create string buffers to capture the output.
+    stdout_buffer = io.StringIO()
+    stderr_buffer = io.StringIO()
+
+    # Redirect both stdout and stderr.
+    with contextlib.redirect_stdout(stdout_buffer), contextlib.redirect_stderr(stderr_buffer):
+        return_value = f()
+
+    # Get the captured content.
+    stdout_content = stdout_buffer.getvalue()
+    stderr_content = stderr_buffer.getvalue()
+
+    return stdout_content, stderr_content, return_value
 
 
 def get_progress_printer(total: int) -> Generator[None, None, None]:

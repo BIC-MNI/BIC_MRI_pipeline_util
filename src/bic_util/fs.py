@@ -1,6 +1,7 @@
 import os
 import tarfile
 from collections.abc import Generator
+from pathlib import Path
 
 from bic_util.print import get_progress_printer, print_error_exit
 
@@ -163,3 +164,35 @@ def tar_with_progress(file_path: str, tar_path: str, file_alias: str | None = No
             arcname=arc_name,
             filter=lambda x: next(progress) or x
         )
+
+
+def get_size(path: Path) -> int:
+    """
+    Get the size of a file or directory in bytes.
+    """
+
+    if path.is_dir():
+        return get_directory_size(path)
+    else:
+        return get_file_size(path)
+
+
+def get_file_size(file_path: Path) -> int:
+    """
+    Get the size of a file in bytes.
+    """
+
+    return file_path.stat().st_size
+
+
+def get_directory_size(dir_path: Path) -> int:
+    """
+    Get the size of a directory in bytes.
+    """
+
+    total_size = 0
+
+    for entry in os.scandir(dir_path):
+        total_size += get_size(Path(entry.path))
+
+    return total_size

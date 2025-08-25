@@ -75,7 +75,7 @@ def with_print_subscript(f: Callable[[], T]) -> T:
         print(COLOR_END, end='')
 
 
-def with_print_capture(f: Callable[[], T]) -> tuple[str, str, T]:
+def with_print_capture(f: Callable[[], T]) -> tuple[T, str, str]:
     """
     Run a function while capturing its standad output and error.
     """
@@ -92,7 +92,7 @@ def with_print_capture(f: Callable[[], T]) -> tuple[str, str, T]:
     stdout_content = stdout_buffer.getvalue()
     stderr_content = stderr_buffer.getvalue()
 
-    return stdout_content, stderr_content, return_value
+    return return_value, stdout_content, stderr_content
 
 
 def get_progress_printer(total: int) -> Generator[None, None, None]:

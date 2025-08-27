@@ -1,8 +1,8 @@
-from enum import Enum
+from enum import IntEnum
 from typing import Any
 
 
-class Comparison(Enum):
+class Comparison(IntEnum):
     """
     Enumeration that represents the result of a three-way comparison.
     """
@@ -30,3 +30,14 @@ def compare(a: Any, b: Any) -> Comparison:
     """
 
     return Comparison((a > b) - (a < b))
+
+
+def optional_string_key(value: str | None) -> tuple[int, str | None]:
+    """
+    Key function for comparing optional strings, with `None` values ordered last.
+    """
+
+    if value is not None:
+        return 0, value  # String values come first.
+    else:
+        return 1, ""  # None values come last.

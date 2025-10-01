@@ -119,15 +119,13 @@ def create_directory(dir_path: str):
         print_error_exit(f"Cannot create directory '{dir_path}', parent directory does not exist.")
 
 
-def rename_file(old_path: str, new_name: str):
+def rename_file(old_path: Path, new_name: str):
     """
     Rename a file or directory.
     """
 
-    dir_name = os.path.dirname(old_path)
-    new_path = os.path.join(dir_name, new_name)
-
-    os.rename(old_path, new_path)
+    new_path = old_path.parent / new_name
+    old_path.rename(new_path)
 
 
 def count_all_dir_files(dir_path: str) -> int:

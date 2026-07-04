@@ -77,7 +77,7 @@ def with_print_subscript(f: Callable[[], T]) -> T:
 
 def with_print_capture(f: Callable[[], T]) -> tuple[T, str, str]:
     """
-    Run a function while capturing its standad output and error.
+    Run a function while capturing its standard output and error.
     """
 
     # Create string buffers to capture the output.

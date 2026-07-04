@@ -1,5 +1,6 @@
 import importlib.util
 import os
+from pathlib import Path
 from typing import Any
 
 from bic_util.fs import require_readable_file
@@ -11,12 +12,12 @@ def load_config_module(file_name: str) -> Any:
     Load a configuration file as a Python module.
     """
 
-    config_fir_path = os.environ.get('CONFIGPATH')
-    if config_fir_path is None:
+    config_dir_value = os.environ.get('CONFIGPATH')
+    if config_dir_value is None:
         print_error_exit("Configuration directory path environment variable not found.")
 
-    config_file_path = os.path.join(config_fir_path, file_name)
-    if not os.path.exists(config_file_path):
+    config_file_path = Path(config_dir_value) / file_name
+    if not config_file_path.exists():
         print_error_exit(f"Configuration file '{file_name}' not found in the configuration directory.")
 
     require_readable_file(config_file_path)

@@ -10,12 +10,12 @@ def update_json(json_path: Path, new_data: dict[str, Any]):
     """
 
     # Read the JSON file.
-    with open(json_path) as json_file:
+    with json_path.open() as json_file:
         data = json.load(json_file)
 
     # Update the JSON data with the new data.
     data.update(new_data)
 
     # Write the updated data back to the JSON file.
-    with open(json_path, 'w') as json_file:
+    with json_path.open('w') as json_file:
         json.dump(data, json_file, indent=4)

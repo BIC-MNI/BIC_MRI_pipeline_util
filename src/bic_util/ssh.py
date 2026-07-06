@@ -111,6 +111,15 @@ def upload_ssh_directory(
 
     sftp_client = ssh_client.open_sftp()
     try:
+        _make_ssh_directory_rec(sftp_client, remote_dir_path)
+
+        for dir_path in local_dir_path.rglob('*'):
+            if not dir_path.is_dir():
+                continue
+
+            rel_path = dir_path.relative_to(local_dir_path)
+            _make_ssh_directory_rec(sftp_client, remote_dir_path / rel_path)
+
         for file_path in local_dir_path.rglob('*'):
             if not file_path.is_file():
                 continue
@@ -118,13 +127,7 @@ def upload_ssh_directory(
             rel_path = file_path.relative_to(local_dir_path)
             remote_file_path = remote_dir_path / rel_path
 
-            # Create remote directory if it doesn't exist
-            remote_dir = remote_file_path.parent
-            try:
-                sftp_client.mkdir(str(remote_dir))
-            except OSError:
-                # Directory might already exist
-                pass
+            _make_ssh_directory_rec(sftp_client, remote_file_path.parent)
 
             if progress_callback is not None:
                 progress_callback(rel_path)
@@ -157,6 +160,23 @@ def download_ssh_file_rec(ssh_client: SSHClient, remote_root_path: Path, local_r
         _download_ssh_file_rec_impl(sftp_client, remote_root_path, local_root_path, rel_path)
     finally:
         sftp_client.close()
+
+
+def _make_ssh_directory_rec(sftp_client: SFTPClient, remote_dir_path: Path):
+    """
+    Create a remote directory and its missing parents using SFTP.
+    """
+
+    for parent_path in reversed(remote_dir_path.parents):
+        try:
+            sftp_client.mkdir(str(parent_path))
+        except OSError:
+            pass
+
+    try:
+        sftp_client.mkdir(str(remote_dir_path))
+    except OSError:
+        pass
 
 
 def _delete_ssh_file_rec_impl(sftp_client: SFTPClient, remote_root_path: Path, rel_path: Path):

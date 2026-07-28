@@ -19,6 +19,19 @@ def find(predicate: Callable[[T], bool], iterable: Iterable[T]) -> T | None:
     return None
 
 
+def find_index(predicate: Callable[[T], bool], iterable: Iterable[T]) -> int | None:
+    """
+    Find the index of the first element in an iterable that satisfies a predicate, or return `None`
+    if no match is found.
+    """
+
+    for index, item in enumerate(iterable):
+        if predicate(item):
+            return index
+
+    return None
+
+
 def find_map(predicate: Callable[[T], U | None], iterable: Iterable[T]) -> U | None:
     """
     Find the first element in an iterable that satisfies a predicate, or return `None` if no match

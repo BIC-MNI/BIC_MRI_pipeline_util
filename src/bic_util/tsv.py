@@ -9,7 +9,7 @@ class TabularMetadataError(ValueError):
     """
 
 
-def upsert_tsv_row(file_path: Path, key_columns: str | tuple[str, ...], values: dict[str, str]) -> None:
+def upsert_tsv_row(file_path: Path, key_columns: str | tuple[str, ...], values: dict[str, str]):
     """
     Insert or update a row in a TSV file and sort all rows by their key.
 

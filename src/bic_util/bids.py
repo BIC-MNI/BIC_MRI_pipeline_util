@@ -128,3 +128,21 @@ def has_bids_session(bids_path: Path, bids_session: BidsSession) -> bool:
 
     bids_session_dir_path = bids_path / f'sub-{bids_session.subject}' / f'ses-{bids_session.session}'
     return bids_session_dir_path.exists()
+
+
+BIDS_LABEL_ORDER = [
+    'sub',
+    'ses',
+    'task',
+    'acq',
+    'ce',
+    'rec',
+    'inv',
+    'mt',
+    'dir',
+    'run',
+    'echo',
+    'part',
+    'chunk',
+    'desc',
+]

@@ -28,7 +28,7 @@ def copy_dicom_dir_patch_patient_name(
     src_dicom_dir_path: Path,
     dst_dicom_dir_path: Path,
     patient_name: str,
-) -> None:
+):
     """
     Copy a DICOM directory while renaming its DICOM patient name attribute.
     """

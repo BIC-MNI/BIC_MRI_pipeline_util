@@ -40,7 +40,7 @@ def acquire_lock(lock_file_path: Path) -> FileLock:
         exit(0)
 
 
-def release_lock(file_lock: FileLock) -> None:
+def release_lock(file_lock: FileLock):
     """
     Release a file lock. Exit the program with an error if the operation fails.
     """

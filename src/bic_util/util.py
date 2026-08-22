@@ -46,6 +46,22 @@ def find_map(predicate: Callable[[T], U | None], iterable: Iterable[T]) -> U | N
     return None
 
 
+K = TypeVar('K')
+V = TypeVar('V')
+
+
+def filter_dict_key(dictionary: dict[K, V], predicate: Callable[[K], bool]) -> dict[K, V]:
+    """
+    Filter a dictionary based on a predicate on its key.
+    """
+
+    return {
+        key: value
+        for key, value in dictionary.items()
+        if predicate(key)
+    }
+
+
 def hours_to_seconds(hours: int):
     """
     Convert a number of hours to a number of seconds.

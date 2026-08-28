@@ -7,18 +7,14 @@ from pathlib import Path
 
 @dataclass
 class BidsSession:
-    """
-    A pair of subject and session labels found in a BIDS dataset.
-    """
+    """A pair of subject and session labels found in a BIDS dataset."""
 
     subject: str
     session: str
 
 
 def get_bids_sessions(bids_path: Path) -> list[BidsSession]:
-    """
-    Get the list of subject and session pairs present in a BIDS dataset.
-    """
+    """Get the subject and session pairs present in a BIDS dataset."""
 
     bids_sessions: list[BidsSession] = []
 
@@ -38,19 +34,13 @@ def get_bids_sessions(bids_path: Path) -> list[BidsSession]:
             if not session_match:
                 continue
 
-            bids_sessions.append(BidsSession(
-                subject=subject_match.group(1),
-                session=session_match.group(1),
-            ))
+            bids_sessions.append(BidsSession(subject=subject_match.group(1), session=session_match.group(1)))
 
     return bids_sessions
 
 
 def copy_bids_sessions(input_bids_path: Path, output_bids_path: Path, bids_sessions: list[BidsSession]):
-    """
-    Copy a BIDS dataset while filtering the acquisition files that do not belong to the specified
-    subject and session pairs.
-    """
+    """Copy a BIDS dataset, retaining only the specified sessions."""
 
     for file_1_path in input_bids_path.iterdir():
         subject_match = re.search(r'sub-(.+)', file_1_path.name)
@@ -90,14 +80,10 @@ def copy_bids_participants_tsv_sessions(
     output_bids_path: Path,
     bids_sessions: list[BidsSession],
 ):
-    """
-    Copy a BIDS `participants.tsv` file while retaining only the subjects that are specified in the
-    given BIDS subject and session pairs.
-    """
+    """Copy participants.tsv, retaining only subjects in the specified sessions."""
 
-    bids_subject_labels = list(map(lambda bids_session: bids_session.subject, bids_sessions))
-
-    input_participants_path  = input_bids_path  / 'participants.tsv'
+    bids_subject_labels = [bids_session.subject for bids_session in bids_sessions]
+    input_participants_path = input_bids_path / 'participants.tsv'
     output_participants_path = output_bids_path / 'participants.tsv'
 
     if not input_participants_path.exists():
@@ -106,10 +92,7 @@ def copy_bids_participants_tsv_sessions(
     with input_participants_path.open() as input_participants_file:
         reader = csv.DictReader(input_participants_file.readlines(), delimiter='\t')
 
-    if reader.fieldnames is None:
-        return
-
-    if 'participant_id' not in reader.fieldnames:
+    if reader.fieldnames is None or 'participant_id' not in reader.fieldnames:
         return
 
     with output_participants_path.open('w') as output_participants_file:
@@ -122,27 +105,6 @@ def copy_bids_participants_tsv_sessions(
 
 
 def has_bids_session(bids_path: Path, bids_session: BidsSession) -> bool:
-    """
-    Check whether a subject and session pair exists in a BIDS dataset.
-    """
+    """Return whether a subject/session directory exists in a BIDS dataset."""
 
-    bids_session_dir_path = bids_path / f'sub-{bids_session.subject}' / f'ses-{bids_session.session}'
-    return bids_session_dir_path.exists()
-
-
-BIDS_LABEL_ORDER = [
-    'sub',
-    'ses',
-    'task',
-    'acq',
-    'ce',
-    'rec',
-    'inv',
-    'mt',
-    'dir',
-    'run',
-    'echo',
-    'part',
-    'chunk',
-    'desc',
-]
+    return (bids_path / f'sub-{bids_session.subject}' / f'ses-{bids_session.session}').exists()
